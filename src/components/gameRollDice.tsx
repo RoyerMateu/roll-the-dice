@@ -3,6 +3,7 @@
 import { getDiceIcon } from '@/utils/diceIcons';
 import { useState, useEffect } from "react";
 import ButtonGame from './buttonGame';
+import Image from 'next/image'
 
 export default function GameRollDice() {
   let [numberOfDices, setNumberOfDices] = useState<number>(1);
@@ -13,7 +14,6 @@ export default function GameRollDice() {
   let [numberOfRolls, setNumberOfRolls] = useState<number>(0);
   let [gameStatus, setGameStatus] = useState<string>('');
   let [gameStep, setGameStep] = useState<number>(1);
-  let [isRolling, setIsRolling] = useState<boolean>(false);
 
   const Dice = () => {
     const diceElements = diceValues.map((value, i) => (
@@ -28,7 +28,7 @@ export default function GameRollDice() {
     return (
       <>
       <div className="w-[620px] mx-auto flex items-center justify-center gap-8 text-center text-5xl" style={{ backgroundImage: `url(/images/scoreboard.png)`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover' }}>
-        <img src='/images/dice-light.png' className='w-60 h-52 -mx-10'/>
+        <Image src='/images/dice-light.png' alt='dices' className='-mx-10' width={230} height={219}/>
         <div>Target <br /> Score</div>
         <div className='text-7xl'>{targetScore}</div>
       </div>
@@ -44,7 +44,7 @@ export default function GameRollDice() {
   const Menu = () => {
     return (
       <div className="w-full flex flex-col gap-6 items-center">
-        <img src='/images/dice-light.png' className='w-60 h-52'/>
+        <Image src='/images/dice-light.png' alt='dices' width={240} height={219}/>
         <label htmlFor="numberOfDices" className='text-5xl'>Select the number of dices</label>
         <input type="number" name="numberOfDices" className="border-4 border-blue-400 bg-transparent flex text-6xl text-center" value={numberOfDices} onChange={handleNumberOfDices} max={20} min={1}/>
         <ButtonGame onClick={startGame} variant='primary'>Start Game</ButtonGame>
@@ -70,9 +70,7 @@ export default function GameRollDice() {
     setGameStatus('');
   }
   
-  function rollingDice() {
-    setIsRolling(true);
-  
+  function rollingDice() {  
     const interval = 100;
     const totalFrames = 10;
   
@@ -91,8 +89,7 @@ export default function GameRollDice() {
         const totalScore = newDiceValues.reduce((acc, curr) => acc + curr, 0);
         setRollResult(totalScore);
         setNumberOfRolls(prevRolls => prevRolls + 1);
-        setIsRolling(false);
-        handleGameInfo(totalScore); // Pasar el nuevo valor de rollResult
+        handleGameInfo(totalScore);
       }
     }, interval);
   }

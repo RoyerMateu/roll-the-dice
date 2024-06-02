@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-function ButtonGame({ variant, onClick, children, disabled = false }) {
+interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'terciary';
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode
+}
+
+function ButtonGame({ variant, onClick, children, disabled = false }: ButtonProps) {
+
   let textColor, bgColor;
-  // Asignar colores según la variante
   switch (variant) {
     case 'primary':
       textColor = 'white';
