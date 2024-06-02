@@ -15,10 +15,6 @@ export default function GameRollDice() {
   let [gameStep, setGameStep] = useState<number>(1);
   let [isRolling, setIsRolling] = useState<boolean>(false);
 
-  useEffect(() => {
-    handleGameInfo();
-  }, [rollResult, numberOfRolls]);
-
   const Dice = () => {
     const diceElements = diceValues.map((value, i) => (
       <div key={i} className="h-20 w-20 flex justify-center items-center" >
@@ -32,9 +28,9 @@ export default function GameRollDice() {
     return (
       <>
       <div className="w-[620px] mx-auto flex items-center justify-center gap-8 text-center text-5xl" style={{ backgroundImage: `url(/images/scoreboard.png)`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover' }}>
-        <img src='/images/dice-light.png' className='w-60 h-52'/>
+        <img src='/images/dice-light.png' className='w-60 h-52 -mx-10'/>
         <div>Target <br /> Score</div>
-        <div>{targetScore}</div>
+        <div className='text-7xl'>{targetScore}</div>
       </div>
       <div className='flex justify-center gap-14 text-2xl mt-5 text-center'>
         <div>High Score: {highScore}</div>
@@ -58,7 +54,9 @@ export default function GameRollDice() {
 
   function handleNumberOfDices(e: { target: { value: string; }; }) {
     const value = parseInt(e.target.value);
-    setNumberOfDices(value);
+    if (value >= 1 && value <= 20) {
+      setNumberOfDices(value);
+    }
   };
 
   function generateTargetScore() {
@@ -69,21 +67,20 @@ export default function GameRollDice() {
     }
     setTargetScore(totalScore);
     setNumberOfRolls(0);
-    setHighScore(0);
     setGameStatus('');
   }
   
   function rollingDice() {
     setIsRolling(true);
   
-    const interval = 100; // Intervalo de tiempo entre cambios de imagen (en milisegundos)
-    const totalFrames = 10; // Número total de imágenes para cambiar (duración total / intervalo)
+    const interval = 100;
+    const totalFrames = 10;
   
     let currentFrame = 0;
     const diceAnimation = setInterval(() => {
       const newDiceValues = [];
       for (let i = 0; i < numberOfDices; i++) {
-        const randomNumber = Math.floor(Math.random() * 6) + 1; // Generar un número aleatorio del 1 al 6
+        const randomNumber = Math.floor(Math.random() * 6) + 1;
         newDiceValues.push(randomNumber);
       }
       setDiceValues(newDiceValues);
@@ -95,26 +92,27 @@ export default function GameRollDice() {
         setRollResult(totalScore);
         setNumberOfRolls(prevRolls => prevRolls + 1);
         setIsRolling(false);
+        handleGameInfo(totalScore); // Pasar el nuevo valor de rollResult
       }
     }, interval);
   }
   
 
-  function handleGameInfo() {
-    if (rollResult > highScore) {
-      setHighScore(rollResult);
-      sessionStorage.setItem('highScore', JSON.stringify(rollResult));
+  function handleGameInfo(newRollResult: number) {
+    if (newRollResult > targetScore) {
+      setHighScore(newRollResult);
+      sessionStorage.setItem('highScore', JSON.stringify(newRollResult));
+      setGameStatus('Congratulations! You won the game!');
+    } else if (newRollResult > highScore) {
+      setHighScore(newRollResult);
+      sessionStorage.setItem('highScore', JSON.stringify(newRollResult));
       setGameStatus('You set your new high score!');
-    } else {
-      setGameStatus('You didn`t get it! Try again!');
-    }
-
-    if (numberOfRolls === 3) {
-      if (highScore > targetScore) {
-        setGameStatus('Congratulations! You won the Game!');
-      } else {
-        setGameStatus('Game over. Do you want to try again?');
-      }
+    } else if (targetScore - newRollResult < 2 && targetScore - newRollResult != 0) {
+      setGameStatus('You are very close to win!');
+    } else if (highScore - newRollResult < 2) {
+      setGameStatus('You are very close to your high score!');
+    } else if (newRollResult < highScore) {
+      setGameStatus('You failed this one, try again');
     }
   }
 
@@ -122,6 +120,17 @@ export default function GameRollDice() {
     generateTargetScore();
     setGameStep(2);
     sessionStorage.setItem('highScore', '');
+  }
+
+  function playAgain() {
+    setGameStatus('');
+    setDiceValues([null]);
+    setRollResult(0);
+    setNumberOfRolls(0);
+    const storedHighScore = sessionStorage.getItem('highScore');
+    if (storedHighScore) {
+      setHighScore(Number(storedHighScore));
+    }
   }
 
   function resetGame() {
@@ -145,11 +154,14 @@ export default function GameRollDice() {
           <Scoreboard />
           <div className='flex items-center flex-col gap-6 mt-10'>
             <Dice />
-            <div>{gameStatus}</div>
+            {rollResult > 0 ? (
+              <div>You have made <span className='text-[#FF2EEA]'>{rollResult} {rollResult === 1 ? 'point' : 'points'}</span></div>
+            ) : null}
+            <div className='text-3xl'>{gameStatus}</div>
             <div className='flex items-center gap-2 '>
-              <ButtonGame onClick={rollingDice} variant='secondary'>Roll the dice</ButtonGame>
-              <br />
-              <ButtonGame onClick={resetGame} variant='terciary'>Restart Game</ButtonGame>
+              <ButtonGame onClick={rollingDice} variant='primary' disabled={rollResult > targetScore}>Roll the dice</ButtonGame>
+              <ButtonGame onClick={playAgain} variant='secondary'>Play Again</ButtonGame>
+              <ButtonGame onClick={resetGame} variant='terciary'>Exit Game</ButtonGame>
             </div>
           </div>
         </>

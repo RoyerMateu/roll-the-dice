@@ -1,8 +1,7 @@
 import React from 'react';
 
-function ButtonGame({ variant, onClick, children }) {
+function ButtonGame({ variant, onClick, children, disabled = false }) {
   let textColor, bgColor;
-
   // Asignar colores según la variante
   switch (variant) {
     case 'primary':
@@ -22,9 +21,12 @@ function ButtonGame({ variant, onClick, children }) {
       bgColor = 'black';
   }
 
+  const disabledBgColor = '#999';
+  const disabledTextColor = '#ccc';
+
   const buttonStyle = {
-    color: textColor,
-    backgroundColor: bgColor,
+    color: disabled ? disabledTextColor : textColor,
+    backgroundColor: disabled ? disabledBgColor : bgColor,
     padding: '8px 16px',
     border: 'none',
     borderRadius: '100px',
@@ -33,7 +35,7 @@ function ButtonGame({ variant, onClick, children }) {
   };
 
   return (
-    <button style={buttonStyle} onClick={onClick}>
+    <button style={buttonStyle} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );
